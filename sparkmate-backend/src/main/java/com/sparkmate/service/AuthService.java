@@ -76,6 +76,7 @@ public class AuthService {
                                 .userId(user.getId())
                                 .email(user.getEmail())
                                 .name(user.getName())
+                                .role(user.getRole().name())
                                 .profileCompleted(false)
                                 .vibeCheckCompleted(false)
                                 .build();
@@ -115,6 +116,7 @@ public class AuthService {
                                         .userId(user.getId())
                                         .email(user.getEmail())
                                         .name(user.getName())
+                                        .role(user.getRole().name())
                                         .profileCompleted(profile != null && profile.getProfileCompleted())
                                         .vibeCheckCompleted(profile != null && profile.getVibeCheckCompleted())
                                         .build();

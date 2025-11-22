@@ -1,8 +1,8 @@
-com\sparkmate\model\Profile$Gender.class
-com\sparkmate\model\Swipe.class
-com\sparkmate\dto\response\ProfileResponse.class
-com\sparkmate\model\User.class
-com\sparkmate\SparkmateApplication.class
-com\sparkmate\model\Swipe$SwipeType.class
 com\sparkmate\model\User$Role.class
+com\sparkmate\model\Swipe$SwipeType.class
+com\sparkmate\model\Profile$Gender.class
+com\sparkmate\SparkmateApplication.class
+com\sparkmate\model\Swipe.class
+com\sparkmate\model\User.class
 com\sparkmate\model\Profile.class
+com\sparkmate\dto\response\ProfileResponse.class

@@ -14,6 +14,9 @@ import LikesPage from './components/Likes/LikesPage';
 import MatchesPage from './components/Matches/MatchesPage';
 import ProfilePage from './components/Profile/ProfilePage';
 import SettingsPage from './components/Profile/SettingsPage';
+import ChatPage from './pages/ChatPage';
+import AdminDashboard from './components/Admin/AdminDashboard';
+import AdminRoute from './components/Admin/AdminRoute';
 
 // Layout Components
 import NavigationBar from './components/Layouts/NavigationBar';
@@ -144,6 +147,24 @@ function App() {
                     <SettingsPage />
                   </MainLayout>
                 </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/chat/:matchId"
+              element={
+                <PrivateRoute>
+                  <ChatPage />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
               }
             />
 

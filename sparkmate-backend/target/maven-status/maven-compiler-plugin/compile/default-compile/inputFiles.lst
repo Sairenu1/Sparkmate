@@ -14,6 +14,7 @@ C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\dto\response
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\model\Match.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\security\JwtAuthenticationFilter.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\model\User.java
+C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\controller\AdminController.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\dto\response\SwipeResultResponse.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\model\Notification.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\dto\response\ApiResponse.java
@@ -35,6 +36,7 @@ C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\security\Jwt
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\dto\request\MessageRequest.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\config\CorsConfig.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\repository\SwipeRepository.java
+C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\service\AdminService.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\dto\response\NotificationResponse.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\model\Message.java
 C:\Users\HP\sparkmate\sparkmate-backend\src\main\java\com\sparkmate\repository\NotificationRepository.java

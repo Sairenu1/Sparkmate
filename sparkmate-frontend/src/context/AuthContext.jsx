@@ -6,6 +6,9 @@ import { Heart } from 'lucide-react';
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+// API BASE URL - Change this if your backend runs on a different port
+const API_BASE_URL = 'http://localhost:8080/api/auth';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,67 +24,115 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // CHECK AUTH ON MOUNT
   useEffect(() => {
-    const savedUser = localStorage.getItem('sparkmate_user');
-
-    if (savedUser) {
-      const parsedUser = safeParseJSON(savedUser);
-      if (parsedUser) {
-        setUser(parsedUser);
-      }
-    }
-
-    setLoading(false);
+    checkAuth();
   }, []);
 
-  // LOGIN FUNCTION
-  const login = async (email, password) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  // CHECK IF USER IS AUTHENTICATED
+  const checkAuth = () => {
+    try {
+      const savedUser = localStorage.getItem('sparkmate_user');
+      const token = localStorage.getItem('sparkmate_token');
 
-    if (email && password) {
-      const userData = {
-        id: 1,
-        name: email.split('@')[0],
-        email: email,
-        isPremium: false
-      };
-
-      setUser(userData);
-      localStorage.setItem('sparkmate_user', JSON.stringify(userData));
-
-      return { success: true };
+      if (savedUser && token) {
+        const parsedUser = safeParseJSON(savedUser);
+        if (parsedUser) {
+          setUser(parsedUser);
+        }
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+    } finally {
+      setLoading(false);
     }
-
-    toast.error('Invalid credentials');
-    return { success: false };
   };
 
-  // SIGNUP FUNCTION
-  const signup = async (name, email, password) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  // LOGIN FUNCTION - CALLS REAL BACKEND API
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    if (name && email && password) {
-      const userData = {
-        id: 1,
-        name: name,
-        email: email,
-        isPremium: false
-      };
+      const data = await response.json();
 
-      setUser(userData);
-      localStorage.setItem('sparkmate_user', JSON.stringify(userData));
+      if (response.ok && data.success) {
+        // Extract user data from response
+        const userData = {
+          id: data.data.userId || data.data.id,
+          name: data.data.name || email.split('@')[0],
+          email: email,
+          token: data.data.token,
+          isPremium: data.data.isPremium || false
+        };
 
-      return { success: true };
+        // Save to state and localStorage
+        setUser(userData);
+        localStorage.setItem('sparkmate_user', JSON.stringify(userData));
+        localStorage.setItem('sparkmate_token', data.data.token);
+
+        toast.success('Welcome back! 💕');
+        return { success: true, user: userData };
+      } else {
+        toast.error(data.message || 'Invalid credentials');
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Unable to connect to server. Please try again.');
+      return { success: false, message: 'Network error' };
     }
+  };
 
-    toast.error('Please fill all fields');
-    return { success: false };
+  // SIGNUP FUNCTION - CALLS REAL BACKEND API
+  const signup = async (signupData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success('Account created successfully! Please login.');
+        return { success: true };
+      } else {
+        toast.error(data.message || 'Signup failed');
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast.error('Unable to connect to server. Please try again.');
+      return { success: false, message: 'Network error' };
+    }
   };
 
   // LOGOUT FUNCTION
   const logout = () => {
     setUser(null);
     localStorage.removeItem('sparkmate_user');
+    localStorage.removeItem('sparkmate_token');
+    toast.success('Logged out successfully');
+  };
+
+  // GET AUTH HEADER FOR API CALLS
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('sparkmate_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  };
+
+  // CHECK IF USER IS AUTHENTICATED
+  const isAuthenticated = () => {
+    return user !== null && localStorage.getItem('sparkmate_token') !== null;
   };
 
   // LOADING SCREEN
@@ -93,12 +144,18 @@ export const AuthProvider = ({ children }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#000',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         }}
       >
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          animate={{ 
+            rotate: 360,
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ 
+            rotate: { duration: 1, repeat: Infinity, ease: 'linear' },
+            scale: { duration: 0.5, repeat: Infinity, ease: 'easeInOut' }
+          }}
         >
           <Heart size={50} fill="#ff006e" color="#ff006e" />
         </motion.div>
@@ -108,7 +165,15 @@ export const AuthProvider = ({ children }) => {
 
   // CONTEXT PROVIDER
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      signup, 
+      logout, 
+      getAuthHeader,
+      isAuthenticated: isAuthenticated(),
+      checkAuth
+    }}>
       {children}
     </AuthContext.Provider>
   );

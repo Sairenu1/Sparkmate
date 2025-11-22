@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, Heart } from 'lucide-react';
 
 // Falling Hearts Component
 const FallingHearts = () => {
-  // const hearts = Array.from({ length: 15 }, (_, i) => ({
-  //   id: i,
-  //   left: `${Math.random() * 100}%`,
-  //   delay: Math.random() * 5,
-  //   duration: 3 + Math.random() * 4,
-  //   size: 10 + Math.random() * 20
-  // }));
+  const hearts = Array.from({ length: 15 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    delay: Math.random() * 5,
+    duration: 3 + Math.random() * 4,
+    size: 10 + Math.random() * 20
+  }));
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -57,38 +59,67 @@ const FallingHearts = () => {
 };
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Redirect if already logged in (only after checking user exists)
+  useEffect(() => {
+    // Small delay to ensure page renders first
+    const timer = setTimeout(() => {
+      if (user) {
+        navigate('/discover', { replace: true });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [user, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!email || !password) {
+      return;
+    }
+
     setLoading(true);
-    // Simulate login
-    setTimeout(() => {
-      alert('Login successful! 💕');
+
+    try {
+      const result = await login(email, password);
+      
+      if (result.success) {
+        // Redirect to discover page
+        setTimeout(() => {
+          navigate('/discover', { replace: true });
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-purple-400 to-indigo-500 animate-gradient-shift">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.1),transparent)]"></div>
       </div>
       
       <FallingHearts />
       
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-10 transform transition-all duration-500 hover:shadow-pink-500/30">
+        <div className="bg-gray-100/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-10 transform transition-all duration-500 hover:shadow-pink-500/30">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full blur-xl opacity-50 animate-pulse"></div>
               <div className="relative bg-gradient-to-br from-pink-500 to-purple-600 rounded-full p-5 shadow-lg transform hover:scale-110 transition-transform duration-300">
-                <Heart size={40} fill="white" color="white" className="animate-bounce" style={{ animationDuration: '2s' }} />
+                <Heart size={40} fill="currentColor" color="currentColor" className="animate-bounce text-gray-100" style={{ animationDuration: '2s' }} />
               </div>
             </div>
           </div>
@@ -106,15 +137,17 @@ const LoginPage = () => {
             {/* Email Input */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-              <div className="relative flex items-center bg-gray-50 rounded-xl border-2 border-gray-200 focus-within:border-pink-500 focus-within:bg-white transition-all duration-300">
+              <div className="relative flex items-center bg-gray-50 rounded-xl border-2 border-gray-200 focus-within:border-pink-500 focus-within:bg-gray-100 transition-all duration-300">
                 <Mail className="absolute left-4 text-gray-400 group-focus-within:text-pink-500 transition-colors" size={20} />
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                  disabled={loading}
+                  className="w-full pl-12 pr-4 py-3.5 bg-transparent outline-none text-gray-700 placeholder-gray-400 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -122,15 +155,17 @@ const LoginPage = () => {
             {/* Password Input */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-              <div className="relative flex items-center bg-gray-50 rounded-xl border-2 border-gray-200 focus-within:border-pink-500 focus-within:bg-white transition-all duration-300">
+              <div className="relative flex items-center bg-gray-50 rounded-xl border-2 border-gray-200 focus-within:border-pink-500 focus-within:bg-gray-100 transition-all duration-300">
                 <Lock className="absolute left-4 text-gray-400 group-focus-within:text-pink-500 transition-colors" size={20} />
                 <input
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                  disabled={loading}
+                  className="w-full pl-12 pr-4 py-3.5 bg-transparent outline-none text-gray-700 placeholder-gray-400 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -138,8 +173,8 @@ const LoginPage = () => {
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-pink-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
+              disabled={loading || !email || !password}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-gray-100 font-semibold py-4 rounded-xl shadow-lg hover:shadow-pink-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
             >
               <span className="relative z-10">
                 {loading ? (
@@ -168,21 +203,17 @@ const LoginPage = () => {
           {/* Sign Up Link */}
           <div className="text-center text-gray-600 text-sm md:text-base">
             Don't have an account?{' '}
-            <a 
-              href="#" 
+            <button 
+              onClick={() => navigate('/signup')}
               className="text-pink-600 font-semibold hover:text-purple-600 transition-colors duration-300 hover:underline"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Navigate to sign up page');
-              }}
             >
               Create one
-            </a>
+            </button>
           </div>
         </div>
 
         {/* Bottom Decorative Elements */}
-        <div className="mt-8 text-center text-white/80 text-xs md:text-sm">
+        <div className="mt-8 text-center text-gray-100/80 text-xs md:text-sm">
           <p>💕 Where hearts connect and love begins 💕</p>
         </div>
       </div>
@@ -206,6 +237,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-
-
